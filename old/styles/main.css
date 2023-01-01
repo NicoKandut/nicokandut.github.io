@@ -1,0 +1,73 @@
+body {
+  font-family: 'Quicksand', sans-serif;
+  font-weight: bold;
+  font-size: 16px;
+  background-color: bisque;
+}
+
+a {
+  color: coral;
+  text-decoration: none;
+  transition: color 0.2s linear;
+}
+
+a:hover {
+  color: lightcoral;
+}
+
+a:visited {
+  color: coral;
+}
+
+
+#body-content {
+  max-width: 1024px;
+  margin: auto;
+}
+
+#header-meta {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+}
+
+#header-meta span {
+  padding: 2px 4px;
+background-color: black;
+color: bisque;
+}
+
+#header-bar {
+  display: flex;
+  justify-content: space-between;
+
+  border-top: solid 2px black;
+  padding-block: 2px;
+  border-bottom: solid 2px black;
+}
+
+#header-square{
+  height: 16px;
+  width: 16px;
+  background-color: black;
+}
+
+#header-circle {
+  height: 16px;
+  width: 16px;
+  background-color: black;
+  border-radius: 8px;
+}
+
+#header-circle2 {
+  height: 8px;
+  width: 8px;
+  background-color: black;
+  border-radius: 4px;
+}
+
+.inline {
+  display: inline-flex;
+  gap:8px;
+  align-items: center;
+}

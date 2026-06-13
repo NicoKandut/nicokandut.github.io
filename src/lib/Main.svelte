@@ -1,5 +1,6 @@
 <script>
 import { progressStore } from "../progressStore";
+  import Scene from "./Scene.svelte";
 </script>
 
 <main>
@@ -9,6 +10,8 @@ import { progressStore } from "../progressStore";
     alt="THE WOKE KOALA"
   />
   <h1 on:click={() => $progressStore.headerUnlocked = true}>NICO KANDUT</h1>
+
+  <Scene />
 </main>
 
 <style>

@@ -218,7 +218,7 @@
 	<span>{scene.structure.length} Shapes, C: {circleCount}, R: {rectCount}, T: {triCount}</span>
 </div>
 
-<textarea>{formatCurrentState()}</textarea>
+<!-- <textarea>{formatCurrentState()}</textarea> -->
 
 <!-- svelte-ignore a11y_no_static_element_interactions -->
 <!-- svelte-ignore a11y_click_events_have_key_events -->

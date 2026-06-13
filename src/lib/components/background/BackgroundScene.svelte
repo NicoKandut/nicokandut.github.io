@@ -407,6 +407,10 @@
 		transition-delay: calc(var(--seed) * 2ms);
 	}
 
+	svg * {
+		animation: fade-in 0.5s ease-in-out;
+	}
+
 	svg :global(*:not(.GROUND9):not(.CLOUD):not(.SUN)) {
 		mix-blend-mode: darken;
 	}
@@ -462,6 +466,15 @@
 		}
 		100% {
 			transform: rotate(360deg);
+		}
+	}
+
+	@keyframes fade-in {
+		0% {
+			opacity: 0;
+		}
+		100% {
+			opacity: 1;
 		}
 	}
 </style>

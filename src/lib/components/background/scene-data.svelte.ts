@@ -193,7 +193,7 @@ export const prepareScenes = (scenes: Record<SceneId, Scene>) => {
 		let triIndex = 0;
 
 		scene.structure.sort((a, b) => {
-			if (a.ci === ColorId.GROUND9 && b.ci !== ColorId.GROUND9) {
+			if (a.ci === ColorId.GROUND9) {
 				return 1;
 			}
 

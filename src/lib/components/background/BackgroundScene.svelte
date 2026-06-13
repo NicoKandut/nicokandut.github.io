@@ -403,11 +403,11 @@
 
 	svg,
 	svg * {
-		transition: all 2s ease;
-		transition-delay: calc(var(--seed) * 1ms);
+		transition: all 0.5s ease;
+		transition-delay: calc(var(--seed) * 2ms);
 	}
 
-	svg :global(*:not(.GROUND9)) {
+	svg :global(*:not(.GROUND9):not(.CLOUD):not(.SUN)) {
 		mix-blend-mode: darken;
 	}
 

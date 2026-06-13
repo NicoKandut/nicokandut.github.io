@@ -5,7 +5,7 @@
 
 	let { children } = $props();
 
-	let sceneId = $state(SceneId.LAKE);
+	let sceneId = $state(SceneId.CABIN);
 	let paletteId = $state(PaletteId.GREEN);
 </script>
 
@@ -20,7 +20,7 @@
 
 <button
 	onclick={() => {
-		sceneId = sceneId === SceneId.CABIN ? SceneId.LAKE : SceneId.CABIN;
+		sceneId = sceneId === SceneId.CABIN ? SceneId.COAST : SceneId.CABIN;
 	}}
 >
 	Change Scene

@@ -1,6 +1,6 @@
 export enum SceneId {
 	CABIN,
-	LAKE
+	COAST
 }
 
 export enum PaletteId {
@@ -166,7 +166,7 @@ export const prepareScenes = (scenes: Record<SceneId, Scene>) => {
 		[SceneId.CABIN]: {
 			structure: []
 		},
-		[SceneId.LAKE]: {
+		[SceneId.COAST]: {
 			structure: []
 		}
 	};
@@ -1260,7 +1260,7 @@ export const SCENE_DATA = $state({
 			)
 		] as Array<CircleStructure | RectStructure | TriStructure>
 	},
-	[SceneId.LAKE]: {
+	[SceneId.COAST]: {
 		structure: [
 			new CircleStructure(126.84892086330936, 23.827338129496404, 14.303345202112999, ColorId.SUN),
 			new CircleStructure(129.9568345323741, 70.70503597122303, 23.63655242254866, ColorId.CLOUD),

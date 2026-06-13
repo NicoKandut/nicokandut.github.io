@@ -1,7 +1,7 @@
 <script lang="ts">
 	import favicon from '$lib/assets/favicon.svg';
 	import BackgroundScene from '$lib/components/background/BackgroundScene.svelte';
-	import { PaletteId, SceneId } from '$lib/components/background/scene-data.svelte';
+	import { PaletteId, SceneId } from '$lib/components/background/scene-types';
 
 	let { children } = $props();
 
@@ -14,7 +14,7 @@
 	<title>Nico Kandut</title>
 </svelte:head>
 
-<BackgroundScene id={sceneId} palette={paletteId}/>
+<BackgroundScene id={sceneId} palette={paletteId} />
 
 <!-- <h1>WELCOME!</h1> -->
 

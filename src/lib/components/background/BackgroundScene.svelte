@@ -1,20 +1,10 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import {
-		CircleStructure,
-		COLOR_IDS,
-		COLOR_NAMES,
-		ColorId,
-		PaletteId,
-		PALETTES,
-		prepareScenes,
-		RectStructure,
-		SCENE_DATA,
-		TriStructure,
-		type SceneId
-	} from './scene-data.svelte';
+	import { prepareScenes, SCENE_DATA } from './scene-data.svelte';
+	import { CircleStructure, COLOR_IDS, COLOR_NAMES, ColorId, PaletteId, RectStructure, TriStructure, type SceneId } from './scene-types';
 	import { on } from 'svelte/events';
 	import { fade } from 'svelte/transition';
+	import { PALETTES } from './palette';
 
 	interface Props {
 		id: SceneId;
@@ -86,23 +76,10 @@
 				s = new CircleStructure(newStructure.x, newStructure.y, newStructure.r, newStructure.ci);
 				break;
 			case 'rect':
-				s = new RectStructure(
-					newStructure.x,
-					newStructure.y,
-					newStructure.w,
-					newStructure.h,
-					newStructure.a,
-					newStructure.ci
-				);
+				s = new RectStructure(newStructure.x, newStructure.y, newStructure.w, newStructure.h, newStructure.a, newStructure.ci);
 				break;
 			case 'tri':
-				s = new TriStructure(
-					newStructure.x,
-					newStructure.y,
-					newStructure.r,
-					newStructure.a,
-					newStructure.ci
-				);
+				s = new TriStructure(newStructure.x, newStructure.y, newStructure.r, newStructure.a, newStructure.ci);
 				break;
 			default:
 				throw new Error('Invalid structure type');
@@ -119,17 +96,11 @@
 
 		for (const s of scene.structure) {
 			if (s instanceof CircleStructure) {
-				strings.push(
-					`new CircleStructure(${s.x}, ${s.y}, ${s.r}, ColorId.${COLOR_IDS[s.ci as ColorId]}),`
-				);
+				strings.push(`new CircleStructure(${s.x}, ${s.y}, ${s.r}, ColorId.${COLOR_IDS[s.ci as ColorId]}),`);
 			} else if (s instanceof RectStructure) {
-				strings.push(
-					`new RectStructure(${s.x}, ${s.y}, ${s.w}, ${s.h}, ${s.a}, ColorId.${COLOR_IDS[s.ci as ColorId]}),`
-				);
+				strings.push(`new RectStructure(${s.x}, ${s.y}, ${s.w}, ${s.h}, ${s.a}, ColorId.${COLOR_IDS[s.ci as ColorId]}),`);
 			} else if (s instanceof TriStructure) {
-				strings.push(
-					`new TriStructure(${s.x}, ${s.y}, ${s.r}, ${s.a}, ColorId.${COLOR_IDS[s.ci as ColorId]}),`
-				);
+				strings.push(`new TriStructure(${s.x}, ${s.y}, ${s.r}, ${s.a}, ColorId.${COLOR_IDS[s.ci as ColorId]}),`);
 			}
 		}
 
@@ -280,17 +251,11 @@
 				transform-origin="{structure.x} {structure.y}"
 				onclick={() => {
 					if (deleteMode) {
-						let index = SCENE_DATA[id].structure.findIndex(
-							(s) =>
-								s.x === structure.x &&
-								s.y === structure.y &&
-								(s instanceof CircleStructure ? s.r === structure.r : false)
-						);
+						let index = SCENE_DATA[id].structure.findIndex((s) => s.x === structure.x && s.y === structure.y && (s instanceof CircleStructure ? s.r === structure.r : false));
 						SCENE_DATA[id].structure = SCENE_DATA[id].structure.filter((_, i) => i !== index);
 					}
 				}}
 				style:--seed={structure.x}
-				transition:fade
 			/>
 		{:else if structure instanceof RectStructure}
 			<rect
@@ -306,18 +271,12 @@
 				onclick={() => {
 					if (deleteMode) {
 						let index = SCENE_DATA[id].structure.findIndex(
-							(s) =>
-								s.x === structure.x &&
-								s.y === structure.y &&
-								(s instanceof RectStructure
-									? s.w === structure.w && s.h === structure.h && s.a === structure.a
-									: false)
+							(s) => s.x === structure.x && s.y === structure.y && (s instanceof RectStructure ? s.w === structure.w && s.h === structure.h && s.a === structure.a : false)
 						);
 						SCENE_DATA[id].structure = SCENE_DATA[id].structure.filter((_, i) => i !== index);
 					}
 				}}
 				style:--seed={structure.x}
-				transition:fade
 			/>
 		{:else if structure instanceof TriStructure}
 			{@const angle1 = 0}
@@ -339,28 +298,18 @@
 				onclick={() => {
 					if (deleteMode) {
 						let index = SCENE_DATA[id].structure.findIndex(
-							(s) =>
-								s.x === structure.x &&
-								s.y === structure.y &&
-								(s instanceof TriStructure ? s.r === structure.r && s.a === structure.a : false)
+							(s) => s.x === structure.x && s.y === structure.y && (s instanceof TriStructure ? s.r === structure.r && s.a === structure.a : false)
 						);
 						SCENE_DATA[id].structure = SCENE_DATA[id].structure.filter((_, i) => i !== index);
 					}
 				}}
 				style:--seed={structure.x}
-				transition:fade
 			/>
 		{/if}
 	{/each}
 
 	{#if newStructure.type === 'circle'}
-		<circle
-			id="new"
-			cx={newStructure.x}
-			cy={newStructure.y}
-			r={newStructure.r}
-			fill={colors[newStructure.ci]}
-		/>
+		<circle id="new" cx={newStructure.x} cy={newStructure.y} r={newStructure.r} fill={colors[newStructure.ci]} />
 	{:else if newStructure.type === 'rect'}
 		<rect
 			id="new"
@@ -405,10 +354,6 @@
 	svg * {
 		transition: all 0.5s ease;
 		transition-delay: calc(var(--seed) * 2ms);
-	}
-
-	svg * {
-		animation: fade-in 0.5s ease-in-out;
 	}
 
 	svg :global(*:not(.GROUND9):not(.CLOUD):not(.SUN)) {
@@ -458,23 +403,5 @@
 		color: white;
 		font-size: 14px;
 		font-family: sans-serif;
-	}
-
-	@keyframes a {
-		0% {
-			transform: rotate(0deg);
-		}
-		100% {
-			transform: rotate(360deg);
-		}
-	}
-
-	@keyframes fade-in {
-		0% {
-			opacity: 0;
-		}
-		100% {
-			opacity: 1;
-		}
 	}
 </style>

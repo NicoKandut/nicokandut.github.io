@@ -1,23 +1,35 @@
 <script lang="ts">
+	import { COLOR_ABBREVIATIONS, COLOR_ID_SKY, COLOR_IDS } from '$lib/components/background/scenes/color';
+	import { PALETTE_COUNT, PALETTES } from '$lib/components/background/scenes/palettes.svelte';
+	import { Circle, equals, Rectangle, Triangle, type Primitive } from '$lib/components/background/scenes/primitive';
+	import { prepareScenes } from '$lib/components/background/scenes/scene-processing';
+	import { SCENE_COUNT, SCENE_DATA, type Scene } from '$lib/components/background/scenes/scenes.svelte';
 	import { onMount } from 'svelte';
-	import { prepareScenes, SCENE_DATA } from './scene-data.svelte';
-	import { CircleStructure, COLOR_IDS, COLOR_NAMES, ColorId, PaletteId, RectStructure, TriStructure, type SceneId } from './scene-types';
 	import { on } from 'svelte/events';
-	import { fade } from 'svelte/transition';
-	import { PALETTES } from './palette';
 
-	interface Props {
-		id: SceneId;
-		palette: PaletteId;
-	}
+	let currentSceneIndex = $state(0);
+	const preparedScenes = $derived(prepareScenes(SCENE_DATA));
+	const currentScene = $derived(SCENE_DATA[currentSceneIndex]);
+	const currentPreparedScene = $derived(preparedScenes[currentSceneIndex]);
 
-	/**
-	 * Converts cursor coordinates to viewBox coordinates.
-	 * The viewbox is 320x180, but the screen can be of any size.
-	 * The viewbox is centered on the screen, and scaled to fit the screen while maintaining its aspect ratio.
-	 * @param x
-	 * @param y
-	 */
+	let currentPaletteIndex = $state(0);
+	const currentPalette = $derived(PALETTES[currentPaletteIndex]);
+
+	const replaceCurrentScene = (scene: Scene) => {
+		SCENE_DATA[currentSceneIndex] = scene;
+	};
+
+	const nextScene = () => {
+		currentSceneIndex += 1;
+		currentSceneIndex %= SCENE_COUNT;
+	};
+
+	const nextPalette = () => {
+		currentPaletteIndex += 1;
+		currentPaletteIndex %= PALETTE_COUNT;
+		console.log('Current palette index:', currentPaletteIndex);
+	};
+
 	const cursorCoordinatesToViewBoxCoordinates = (x: number, y: number) => {
 		const viewBoxWidth = 320;
 		const viewBoxHeight = 180;
@@ -36,13 +48,6 @@
 		return { x: viewBoxX, y: viewBoxY };
 	};
 
-	let { id, palette }: Props = $props();
-
-	let preparedScenes = $derived(prepareScenes(SCENE_DATA));
-
-	let scene = $derived(preparedScenes[id]);
-	let colors = $derived(PALETTES[palette]);
-
 	const initialStructure = () => {
 		return {
 			stage: 'none',
@@ -54,7 +59,7 @@
 			w: 10,
 			h: 10,
 			a: 0,
-			ci: ColorId.GROUND0
+			ci: 0
 		};
 	};
 
@@ -69,23 +74,23 @@
 	};
 
 	function addNewStructureToScene() {
-		let s!: CircleStructure | RectStructure | TriStructure;
+		let s!: Primitive;
 
 		switch (newStructure.type) {
 			case 'circle':
-				s = new CircleStructure(newStructure.x, newStructure.y, newStructure.r, newStructure.ci);
+				s = new Circle(newStructure.x, newStructure.y, newStructure.r, newStructure.ci);
 				break;
 			case 'rect':
-				s = new RectStructure(newStructure.x, newStructure.y, newStructure.w, newStructure.h, newStructure.a, newStructure.ci);
+				s = new Rectangle(newStructure.x, newStructure.y, newStructure.w, newStructure.h, newStructure.a, newStructure.ci);
 				break;
 			case 'tri':
-				s = new TriStructure(newStructure.x, newStructure.y, newStructure.r, newStructure.a, newStructure.ci);
+				s = new Triangle(newStructure.x, newStructure.y, newStructure.r, newStructure.a, newStructure.ci);
 				break;
 			default:
 				throw new Error('Invalid structure type');
 		}
 
-		SCENE_DATA[id].structure.push(s);
+		currentScene.push(s);
 		resetNewStructure();
 	}
 
@@ -94,22 +99,22 @@
 	const formatCurrentState = () => {
 		const strings: string[] = [];
 
-		for (const s of scene.structure) {
-			if (s instanceof CircleStructure) {
-				strings.push(`new CircleStructure(${s.x}, ${s.y}, ${s.r}, ColorId.${COLOR_IDS[s.ci as ColorId]}),`);
-			} else if (s instanceof RectStructure) {
-				strings.push(`new RectStructure(${s.x}, ${s.y}, ${s.w}, ${s.h}, ${s.a}, ColorId.${COLOR_IDS[s.ci as ColorId]}),`);
-			} else if (s instanceof TriStructure) {
-				strings.push(`new TriStructure(${s.x}, ${s.y}, ${s.r}, ${s.a}, ColorId.${COLOR_IDS[s.ci as ColorId]}),`);
+		for (const s of currentScene) {
+			if (s instanceof Circle) {
+				strings.push(`new Circle(${s.x}, ${s.y}, ${s.r}, COLOR_ID_${COLOR_IDS[s.ci]}),`);
+			} else if (s instanceof Rectangle) {
+				strings.push(`new Rectangle(${s.x}, ${s.y}, ${s.w}, ${s.h}, ${s.a}, COLOR_ID_${COLOR_IDS[s.ci]}),`);
+			} else if (s instanceof Triangle) {
+				strings.push(`new Triangle(${s.x}, ${s.y}, ${s.r}, ${s.a}, COLOR_ID_${COLOR_IDS[s.ci]}),`);
 			}
 		}
 
 		return strings.join('\n');
 	};
 
-	let circleCount = $derived(scene.structure.filter((s) => s instanceof CircleStructure).length);
-	let rectCount = $derived(scene.structure.filter((s) => s instanceof RectStructure).length);
-	let triCount = $derived(scene.structure.filter((s) => s instanceof TriStructure).length);
+	let circleCount = $derived(currentScene.filter((s) => s instanceof Circle).length);
+	let rectCount = $derived(currentScene.filter((s) => s instanceof Rectangle).length);
+	let triCount = $derived(currentScene.filter((s) => s instanceof Triangle).length);
 
 	onMount(() => {
 		return on(window, 'keydown', (e) => {
@@ -127,6 +132,8 @@
 </script>
 
 <div>
+	<button onclick={() => nextScene()}> Change Scene </button>
+	<button onclick={() => nextPalette()}> Change Palette </button>
 	<span>MODE: {newStructure.stage}</span>
 	<button
 		onclick={() => {
@@ -173,7 +180,7 @@
 		Delete
 	</button>
 
-	{#each Object.values(colors) as c, i (i)}
+	{#each Object.values(currentPalette) as c, i (i)}
 		<button
 			class:active={newStructure.ci === i}
 			class="color-btn"
@@ -182,11 +189,11 @@
 				newStructure.ci = i;
 			}}
 		>
-			{COLOR_NAMES[i as ColorId]}
+			{COLOR_ABBREVIATIONS[i]}
 		</button>
 	{/each}
 
-	<span>{scene.structure.length} Shapes, C: {circleCount}, R: {rectCount}, T: {triCount}</span>
+	<span>{currentScene.length} Primitives, Circle: {circleCount}, Rectangle: {rectCount}, Triangle: {triCount}</span>
 </div>
 
 <!-- <textarea>{formatCurrentState()}</textarea> -->
@@ -199,7 +206,7 @@
 	width="320"
 	height="180"
 	xmlns="http://www.w3.org/2000/svg"
-	style:background-color={colors[ColorId.SKY]}
+	style:background-color={currentPalette[COLOR_ID_SKY]}
 	onmousemove={(e) => {
 		if (newStructure.stage === 'moving') {
 			const { x, y } = cursorCoordinatesToViewBoxCoordinates(e.clientX, e.clientY);
@@ -239,46 +246,44 @@
 		}
 	}}
 >
-	{#each scene.structure as structure (structure.id)}
-		{#if structure instanceof CircleStructure}
+	{#each currentPreparedScene as primitive (primitive.id)}
+		{#if primitive instanceof Circle}
 			<circle
-				cx={structure.x}
-				cy={structure.y}
-				r={structure.r}
-				id={structure.id}
-				class={COLOR_IDS[structure.ci as ColorId]}
-				fill={colors[structure.ci]}
-				transform-origin="{structure.x} {structure.y}"
+				cx={primitive.x}
+				cy={primitive.y}
+				r={primitive.r}
+				id={primitive.id}
+				class={COLOR_IDS[primitive.ci]}
+				fill={currentPalette[primitive.ci]}
+				transform-origin="{primitive.x} {primitive.y}"
 				onclick={() => {
 					if (deleteMode) {
-						let index = SCENE_DATA[id].structure.findIndex((s) => s.x === structure.x && s.y === structure.y && (s instanceof CircleStructure ? s.r === structure.r : false));
-						SCENE_DATA[id].structure = SCENE_DATA[id].structure.filter((_, i) => i !== index);
+						let i = currentScene.findIndex((s) => equals(s, primitive));
+						replaceCurrentScene(currentScene.splice(i));
 					}
 				}}
-				style:--seed={structure.x}
+				style:--seed={primitive.x}
 			/>
-		{:else if structure instanceof RectStructure}
+		{:else if primitive instanceof Rectangle}
 			<rect
-				x={structure.x}
-				y={structure.y}
-				width={structure.w}
-				height={structure.h}
-				id={structure.id}
-				class={COLOR_IDS[structure.ci as ColorId]}
-				transform-origin="{structure.x} {structure.y}"
-				transform="rotate({structure.a} 0 0)"
-				fill={colors[structure.ci]}
+				x={primitive.x}
+				y={primitive.y}
+				width={primitive.w}
+				height={primitive.h}
+				id={primitive.id}
+				class={COLOR_IDS[primitive.ci]}
+				transform-origin="{primitive.x} {primitive.y}"
+				transform="rotate({primitive.a} 0 0)"
+				fill={currentPalette[primitive.ci]}
 				onclick={() => {
 					if (deleteMode) {
-						let index = SCENE_DATA[id].structure.findIndex(
-							(s) => s.x === structure.x && s.y === structure.y && (s instanceof RectStructure ? s.w === structure.w && s.h === structure.h && s.a === structure.a : false)
-						);
-						SCENE_DATA[id].structure = SCENE_DATA[id].structure.filter((_, i) => i !== index);
+						let i = currentScene.findIndex((s) => equals(s, primitive));
+						replaceCurrentScene(currentScene.splice(i));
 					}
 				}}
-				style:--seed={structure.x}
+				style:--seed={primitive.x}
 			/>
-		{:else if structure instanceof TriStructure}
+		{:else if primitive instanceof Triangle}
 			{@const angle1 = 0}
 			{@const angle2 = 120}
 			{@const angle3 = 240}
@@ -290,26 +295,24 @@
 			{@const y3 = Math.sin((angle3 * Math.PI) / 180)}
 			<polygon
 				points="{x1},{y1} {x2},{y2} {x3},{y3}"
-				id={structure.id}
-				class={COLOR_IDS[structure.ci as ColorId]}
-				fill={colors[structure.ci]}
-				transform-origin="{structure.x} {structure.y}"
-				transform="rotate({structure.a} 0 0) scale({structure.r} {structure.r}) translate({structure.x} {structure.y})"
+				id={primitive.id}
+				class={COLOR_IDS[primitive.ci]}
+				fill={currentPalette[primitive.ci]}
+				transform-origin="{primitive.x} {primitive.y}"
+				transform="rotate({primitive.a} 0 0) scale({primitive.r} {primitive.r}) translate({primitive.x} {primitive.y})"
 				onclick={() => {
 					if (deleteMode) {
-						let index = SCENE_DATA[id].structure.findIndex(
-							(s) => s.x === structure.x && s.y === structure.y && (s instanceof TriStructure ? s.r === structure.r && s.a === structure.a : false)
-						);
-						SCENE_DATA[id].structure = SCENE_DATA[id].structure.filter((_, i) => i !== index);
+						let i = currentScene.findIndex((s) => equals(s, primitive));
+						replaceCurrentScene(currentScene.splice(i));
 					}
 				}}
-				style:--seed={structure.x}
+				style:--seed={primitive.x}
 			/>
 		{/if}
 	{/each}
 
 	{#if newStructure.type === 'circle'}
-		<circle id="new" cx={newStructure.x} cy={newStructure.y} r={newStructure.r} fill={colors[newStructure.ci]} />
+		<circle id="new" cx={newStructure.x} cy={newStructure.y} r={newStructure.r} fill={currentPalette[newStructure.ci]} />
 	{:else if newStructure.type === 'rect'}
 		<rect
 			id="new"
@@ -317,7 +320,7 @@
 			y={newStructure.y}
 			width={newStructure.w}
 			height={newStructure.h}
-			fill={colors[newStructure.ci]}
+			fill={currentPalette[newStructure.ci]}
 			transform-origin="{newStructure.x} {newStructure.y}"
 			transform="rotate({newStructure.a} 0 0)"
 		/>
@@ -331,7 +334,7 @@
 		{@const y2 = newStructure.y + newStructure.r * Math.sin((angle2 * Math.PI) / 180)}
 		{@const x3 = newStructure.x + newStructure.r * Math.cos((angle3 * Math.PI) / 180)}
 		{@const y3 = newStructure.y + newStructure.r * Math.sin((angle3 * Math.PI) / 180)}
-		<polygon id="new" points="{x1},{y1} {x2},{y2} {x3},{y3}" fill={colors[newStructure.ci]} />
+		<polygon id="new" points="{x1},{y1} {x2},{y2} {x3},{y3}" fill={currentPalette[newStructure.ci]} />
 	{/if}
 
 	<!-- <rect id="frame" x="0" y="0" width="320" height="180" fill="none" stroke-width="1" stroke="red" />
@@ -348,6 +351,8 @@
 		width: 100vw;
 
 		z-index: -1;
+
+		overflow: hidden;
 	}
 
 	svg,

@@ -1,12 +1,9 @@
 <script lang="ts">
+	import './font.css';
 	import favicon from '$lib/assets/favicon.svg';
 	import BackgroundScene from '$lib/components/background/BackgroundScene.svelte';
-	import { PaletteId, SceneId } from '$lib/components/background/scene-types';
 
 	let { children } = $props();
-
-	let sceneId = $state(SceneId.CABIN);
-	let paletteId = $state(PaletteId.GREEN);
 </script>
 
 <svelte:head>
@@ -14,25 +11,7 @@
 	<title>Nico Kandut</title>
 </svelte:head>
 
-<BackgroundScene id={sceneId} palette={paletteId} />
-
-<!-- <h1>WELCOME!</h1> -->
-
-<button
-	onclick={() => {
-		sceneId = sceneId === SceneId.CABIN ? SceneId.COAST : SceneId.CABIN;
-	}}
->
-	Change Scene
-</button>
-
-<button
-	onclick={() => {
-		paletteId = paletteId === PaletteId.GREEN ? PaletteId.RED : PaletteId.GREEN;
-	}}
->
-	Change Palette
-</button>
+<BackgroundScene />
 
 {@render children()}
 
